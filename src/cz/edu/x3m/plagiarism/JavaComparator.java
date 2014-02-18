@@ -1,14 +1,20 @@
 package cz.edu.x3m.plagiarism;
 
+import cz.edu.x3m.plagiarism.utils.Strings;
+import cz.edu.x3m.plagiarism.utils.Penalisator;
+import cz.edu.x3m.plagiarism.statements.IStatementVisitor;
 import cz.edu.x3m.data.mains.AbstractHolder;
 import cz.edu.x3m.data.mains.ClassHolder;
 import cz.edu.x3m.data.mains.IfaceHolder;
 import cz.edu.x3m.plagiarism.comparators.FieldPenalisator;
 import cz.edu.x3m.plagiarism.comparators.ParameterPenalisator;
 import cz.edu.x3m.plagiarism.comparators.StatementPenalisator;
+import cz.edu.x3m.plagiarism.utils.FileUtils;
 import cz.edu.x3m.plagiarism.visitors.IClassAndIfaceHolder;
 import japa.parser.ast.body.JavadocComment;
 import japa.parser.ast.body.Parameter;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +24,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Jan Hybs <x3mSpeedy@gmail.com>
  */
-public class CompareLibrary {
-    
+public class JavaComparator implements ILanguageComparator {
+
     private static final int FUNCTION_BALANCE_UNIT = 100;
-    private static final int FUNCTION_HEAD_UNIT = 30;
-    private static final int FUNCTION_BODY_UNIT = 70;
     //
     public static final int PENALTY_MAXIMUM = 100;
     public static final int PENALTY_INSERTION = 100;
@@ -31,14 +35,54 @@ public class CompareLibrary {
     public static final int PENALTY_NONE = 0;
     //
     private static final boolean DEBUG = true;
-    
-    
-    
+    //
+    private IClassAndIfaceHolder preparedHolder;
+
+
+
+    @Override
+    public void prepare (File dirA) throws Exception {
+        FilenameFilter filter = FileUtils.getJavaExtensionFilter ();
+        List<File> filesA = FileUtils.getAllFiles (dirA, filter);
+        preparedHolder = new JavaCollector ().collect (filesA);
+    }
+
+
+
+    @Override
+    public Difference compare (File dirB) throws Exception {
+        if (preparedHolder == null)
+            throw new Exception ("solution was not prepared before!");
+
+
+        FilenameFilter filter = FileUtils.getJavaExtensionFilter ();
+        List<File> filesA = FileUtils.getAllFiles (dirB, filter);
+        IClassAndIfaceHolder secondHolder = new JavaCollector ().collect (filesA);
+
+        return compare (preparedHolder, secondHolder);
+    }
+
+
+
+    @Override
+    public Difference compare (File dirA, File dirB) throws Exception {
+        FilenameFilter filter = FileUtils.getJavaExtensionFilter ();
+        List<File> filesA = FileUtils.getAllFiles (dirA, filter);
+        List<File> filesB = FileUtils.getAllFiles (dirB, filter);
+
+        IClassAndIfaceHolder holderA = new JavaCollector ().collect (filesA);
+        IClassAndIfaceHolder holderB = new JavaCollector ().collect (filesB);
+
+        return compare (holderA, holderB);
+    }
+
+
+
     public static Difference compareFunction (IStatementVisitor a, IStatementVisitor b) {
         Difference modsDiff, statDiff, consDiff, commDiff, prmsDiff;
         Difference head, body;
         List<Parameter> aParams, bParams;
-        
+
         double value = 0;
         double maxim = 0;
 
@@ -92,19 +136,19 @@ public class CompareLibrary {
         int balance = stmts * 60 + 90;
         balance = balance < 150 ? 150 : balance > 1000 ? 1000 : balance;
         head = head.balance (balance);
-        
-        
+
+
         return head.add (body);
     }
-    
-    
-    
+
+
+
     public static Difference compareString (String a, String b, int maxim) {
         return compareString (a, b).balance (maxim);
     }
-    
-    
-    
+
+
+
     public static Difference compareString (String s1, String s2) {
         if (s1 == null)
             s1 = "";
@@ -115,13 +159,13 @@ public class CompareLibrary {
         int maxim = Math.max (s1.length (), s2.length ());
         int value = StringUtils.getLevenshteinDistance (s1, s2);
         value = value > maxim ? maxim : value;
-        
+
         return new Difference (value, maxim);
     }
-    
-    
-    
-    public static Difference compareAll (IClassAndIfaceHolder a, IClassAndIfaceHolder b) {
+
+
+
+    public static Difference compare (IClassAndIfaceHolder a, IClassAndIfaceHolder b) {
         ClassHolder classBestMatch = null;
         IfaceHolder ifaceBestMatch = null;
         Difference classDiff = null, ifaceDiff = null;
@@ -177,12 +221,12 @@ public class CompareLibrary {
             }
             classBest = null;
         }
-        
+
         return classResult.balance (100);
     }
-    
-    
-    
+
+
+
     public static Difference compareClassOrIface (AbstractHolder a, AbstractHolder b) {
         IStatementVisitor bestMatch = null;
         Difference methodDiff = null;
@@ -205,7 +249,7 @@ public class CompareLibrary {
 
         // fields
         fldsDiff = distance (a.getFields (), b.getFields (), FieldPenalisator.get ());
-        
+
         for (IStatementVisitor c0 : a.getMethods ()) {
             for (IStatementVisitor c1 : b.getMethods ()) {
                 // compare classes
@@ -232,23 +276,23 @@ public class CompareLibrary {
             }
             best = null;
         }
-        
-        modsDiff = modsDiff.balance(FUNCTION_BALANCE_UNIT);
-        commDiff = commDiff.balance(FUNCTION_BALANCE_UNIT);
+
+        modsDiff = modsDiff.balance (FUNCTION_BALANCE_UNIT);
+        commDiff = commDiff.balance (FUNCTION_BALANCE_UNIT);
         head = head.add (modsDiff).add (commDiff).add (fldsDiff);
         result = result.add (head);
-        
+
         return result;
     }
     //----------------------------------------------------------------------------------------------
 
-    
-    
+
+
     private static int minOfThreeNumbers (int num1, int num2, int num3) {
         return Math.min (num1, Math.min (num2, num3));
     }
-    
-    
+
+
 
     private static <T> Difference distance (List<T> s1, List<T> s2, Penalisator<T> penalisator) {
         if (s1 == null)
@@ -262,7 +306,7 @@ public class CompareLibrary {
         //empty comparation
         if (n == m && n == 0)
             return Difference.empty ();
-        
+
         int maxim = Math.max (m, n) * PENALTY_MAXIMUM;
         if (m == 0) {
             // some simple heuristics
@@ -305,7 +349,7 @@ public class CompareLibrary {
 
             // for each column in the distance matrix
             for (int j = 1; j <= n; j++) {
-                
+
                 statement2 = s2.get (j - 1);
                 final int penalty = penalisator.penalise (statement1, statement2);
                 if (penalty == 0) {
@@ -316,19 +360,19 @@ public class CompareLibrary {
                             currD[j - 1] + PENALTY_INSERTION,
                             prevD[j - 1] + penalty);
                 }
-                
+
             }
-            
+
             temp = prevD;
             prevD = currD;
             currD = temp;
-            
+
         }
 
         // after swapping, the final answer is now in the last column of prevD
         int value = prevD[prevD.length - 1];
         value = value > maxim ? maxim : value;
-        
+
         return new Difference (value, maxim);
     }
     /*

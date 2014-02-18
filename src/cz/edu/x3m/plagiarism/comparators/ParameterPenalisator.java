@@ -1,7 +1,7 @@
 package cz.edu.x3m.plagiarism.comparators;
 
-import cz.edu.x3m.plagiarism.CompareLibrary;
-import cz.edu.x3m.plagiarism.Penalisator;
+import cz.edu.x3m.plagiarism.JavaComparator;
+import cz.edu.x3m.plagiarism.utils.Penalisator;
 import japa.parser.ast.body.Parameter;
 
 /**
@@ -22,7 +22,7 @@ public class ParameterPenalisator implements Penalisator<Parameter> {
     @Override
     public int penalise (Parameter o1, Parameter o2) {
         boolean areSame = o1.getType ().toString ().equals (o2.getType ().toString ());
-        return areSame ? CompareLibrary.PENALTY_NONE : CompareLibrary.PENALTY_SUBSTITUTION;
+        return areSame ? JavaComparator.PENALTY_NONE : JavaComparator.PENALTY_SUBSTITUTION;
     }
 
 

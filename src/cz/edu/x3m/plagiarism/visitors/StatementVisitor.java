@@ -1,7 +1,7 @@
 package cz.edu.x3m.plagiarism.visitors;
 
-import cz.edu.x3m.plagiarism.IStatementVisitor;
-import cz.edu.x3m.plagiarism.StatementType;
+import cz.edu.x3m.plagiarism.statements.IStatementVisitor;
+import cz.edu.x3m.plagiarism.statements.StatementType;
 import japa.parser.ast.body.*;
 import japa.parser.ast.expr.*;
 import japa.parser.ast.stmt.*;

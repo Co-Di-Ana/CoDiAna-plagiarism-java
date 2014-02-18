@@ -1,8 +1,8 @@
 package cz.edu.x3m.plagiarism.visitors;
 
-import cz.edu.x3m.plagiarism.CompareLibrary;
+import cz.edu.x3m.plagiarism.JavaComparator;
 import cz.edu.x3m.plagiarism.Difference;
-import cz.edu.x3m.plagiarism.IStatementVisitor;
+import cz.edu.x3m.plagiarism.statements.IStatementVisitor;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
@@ -91,6 +91,6 @@ public class FunctionVisitor extends StatementVisitor {
 
     @Override
     public Difference compare (IStatementVisitor that) {
-        return CompareLibrary.compareFunction (this, that);
+        return JavaComparator.compareFunction (this, that);
     }
 }

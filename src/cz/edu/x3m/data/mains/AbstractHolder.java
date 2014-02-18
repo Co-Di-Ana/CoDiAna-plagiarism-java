@@ -1,6 +1,6 @@
 package cz.edu.x3m.data.mains;
 
-import cz.edu.x3m.plagiarism.IStatementVisitor;
+import cz.edu.x3m.plagiarism.statements.IStatementVisitor;
 import japa.parser.ast.body.FieldDeclaration;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author Jan Hybs <x3mSpeedy@gmail.com>
  */
-abstract public class AbstractHolder implements IClassOrIFaceHolder {
+abstract public class AbstractHolder implements IClassOrIfaceHolder {
 
     protected IStatementVisitor constructor = null;
     protected List<IStatementVisitor> methods = new ArrayList<> ();

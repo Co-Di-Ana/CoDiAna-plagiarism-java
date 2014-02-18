@@ -1,5 +1,6 @@
-package cz.edu.x3m.plagiarism;
+package cz.edu.x3m.plagiarism.utils;
 
+import cz.edu.x3m.plagiarism.Difference;
 import java.lang.reflect.Modifier;
 
 /**

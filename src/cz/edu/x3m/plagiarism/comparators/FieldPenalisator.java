@@ -1,9 +1,9 @@
 package cz.edu.x3m.plagiarism.comparators;
 
-import cz.edu.x3m.plagiarism.CompareLibrary;
+import cz.edu.x3m.plagiarism.JavaComparator;
 import cz.edu.x3m.plagiarism.Difference;
-import cz.edu.x3m.plagiarism.ModifiersUtil;
-import cz.edu.x3m.plagiarism.Penalisator;
+import cz.edu.x3m.plagiarism.utils.ModifiersUtil;
+import cz.edu.x3m.plagiarism.utils.Penalisator;
 import japa.parser.ast.body.FieldDeclaration;
 import java.lang.reflect.Modifier;
 
@@ -14,8 +14,8 @@ import java.lang.reflect.Modifier;
 public class FieldPenalisator implements Penalisator<FieldDeclaration> {
 
     private static FieldPenalisator instance;
-    private static final int MODS_WEIGHT = (int) (CompareLibrary.PENALTY_SUBSTITUTION * 0.30);
-    private static final int TYPE_WEIGHT = (int) (CompareLibrary.PENALTY_SUBSTITUTION * 0.70);
+    private static final int MODS_WEIGHT = (int) (JavaComparator.PENALTY_SUBSTITUTION * 0.30);
+    private static final int TYPE_WEIGHT = (int) (JavaComparator.PENALTY_SUBSTITUTION * 0.70);
 
 
 

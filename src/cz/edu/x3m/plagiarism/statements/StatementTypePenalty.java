@@ -1,8 +1,9 @@
-package cz.edu.x3m.plagiarism;
+package cz.edu.x3m.plagiarism.statements;
 
+import cz.edu.x3m.plagiarism.JavaComparator;
 import java.util.HashMap;
 import java.util.Map;
-import static cz.edu.x3m.plagiarism.StatementType.*;
+import static cz.edu.x3m.plagiarism.statements.StatementType.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,8 +53,8 @@ public class StatementTypePenalty {
 
 
     public StatementTypePenalty () {
-        setPenalty (For, Foreach, 0.25 * CompareLibrary.PENALTY_SUBSTITUTION);
-        setPenalty (If, Ternal, 0.25 * CompareLibrary.PENALTY_SUBSTITUTION);
+        setPenalty (For, Foreach, 0.25 * JavaComparator.PENALTY_SUBSTITUTION);
+        setPenalty (If, Ternal, 0.25 * JavaComparator.PENALTY_SUBSTITUTION);
     }
 
 
@@ -66,7 +67,7 @@ public class StatementTypePenalty {
 
     public int getPenalty (StatementType s1, StatementType s2) {
         int key = getID (s1, s2);
-        return penalties.containsKey (key) ? penalties.get (key) : CompareLibrary.PENALTY_SUBSTITUTION;
+        return penalties.containsKey (key) ? penalties.get (key) : JavaComparator.PENALTY_SUBSTITUTION;
     }
 
 

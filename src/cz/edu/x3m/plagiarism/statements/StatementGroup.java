@@ -1,4 +1,4 @@
-package cz.edu.x3m.plagiarism;
+package cz.edu.x3m.plagiarism.statements;
 
 import java.util.ArrayList;
 import java.util.Collections;

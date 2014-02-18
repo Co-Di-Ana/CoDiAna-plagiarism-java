@@ -1,4 +1,4 @@
-package cz.edu.x3m.plagiarism;
+package cz.edu.x3m.plagiarism.utils;
 
 /**
  *

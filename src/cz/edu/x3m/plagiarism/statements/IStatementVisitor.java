@@ -1,5 +1,6 @@
-package cz.edu.x3m.plagiarism;
+package cz.edu.x3m.plagiarism.statements;
 
+import cz.edu.x3m.plagiarism.Difference;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.MethodDeclaration;

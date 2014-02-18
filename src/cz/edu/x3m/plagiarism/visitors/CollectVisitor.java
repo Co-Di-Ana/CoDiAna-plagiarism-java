@@ -1,8 +1,8 @@
 package cz.edu.x3m.plagiarism.visitors;
 
-import cz.edu.x3m.plagiarism.IStatementVisitor;
+import cz.edu.x3m.plagiarism.statements.IStatementVisitor;
 import cz.edu.x3m.data.mains.ClassHolder;
-import cz.edu.x3m.data.mains.IClassOrIFaceHolder;
+import cz.edu.x3m.data.mains.IClassOrIfaceHolder;
 import cz.edu.x3m.data.mains.IfaceHolder;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
@@ -39,7 +39,7 @@ public class CollectVisitor extends VoidVisitorAdapter<Object> implements IClass
 
     @Override
     public void visit (ClassOrInterfaceDeclaration n, Object arg) {
-        IClassOrIFaceHolder holder;
+        IClassOrIfaceHolder holder;
         if (n.isInterface ()) {
             holder = new IfaceHolder (n);
             ifaces.add ((IfaceHolder) holder);
@@ -57,7 +57,7 @@ public class CollectVisitor extends VoidVisitorAdapter<Object> implements IClass
 
     @Override
     public void visit (MethodDeclaration n, Object arg) {
-        IClassOrIFaceHolder holder = (IClassOrIFaceHolder) arg;
+        IClassOrIfaceHolder holder = (IClassOrIfaceHolder) arg;
         IStatementVisitor statementVisitor = new FunctionVisitor (n);
         holder.addMethod (statementVisitor);
 
@@ -69,7 +69,7 @@ public class CollectVisitor extends VoidVisitorAdapter<Object> implements IClass
 
     @Override
     public void visit (ConstructorDeclaration n, Object arg) {
-        IClassOrIFaceHolder holder = (IClassOrIFaceHolder) arg;
+        IClassOrIfaceHolder holder = (IClassOrIfaceHolder) arg;
         IStatementVisitor statementVisitor = new FunctionVisitor (n);
         holder.setConstructor (statementVisitor);
 
@@ -81,7 +81,7 @@ public class CollectVisitor extends VoidVisitorAdapter<Object> implements IClass
 
     @Override
     public void visit (FieldDeclaration n, Object arg) {
-        IClassOrIFaceHolder holder = (IClassOrIFaceHolder) arg;
+        IClassOrIfaceHolder holder = (IClassOrIfaceHolder) arg;
         holder.addField (n);
         super.visit (n, arg);
     }
