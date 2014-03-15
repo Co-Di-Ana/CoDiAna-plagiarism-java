@@ -44,6 +44,6 @@ class JavaExtensionFilter implements FilenameFilter {
 
     @Override
     public boolean accept (File dir, String name) {
-        return dir != null && dir.isFile () && dir.getName ().endsWith (JAVA);
+        return name.endsWith (JAVA);
     }
 }

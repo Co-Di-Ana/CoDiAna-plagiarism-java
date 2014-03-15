@@ -9,6 +9,7 @@ import cz.edu.x3m.data.mains.IfaceHolder;
 import cz.edu.x3m.plagiarism.comparators.FieldPenalisator;
 import cz.edu.x3m.plagiarism.comparators.ParameterPenalisator;
 import cz.edu.x3m.plagiarism.comparators.StatementPenalisator;
+import cz.edu.x3m.plagiarism.utils.CountCrate;
 import cz.edu.x3m.plagiarism.utils.FileUtils;
 import cz.edu.x3m.plagiarism.visitors.IClassAndIfaceHolder;
 import japa.parser.ast.body.JavadocComment;
@@ -56,8 +57,8 @@ public class JavaComparator implements ILanguageComparator {
 
 
         FilenameFilter filter = FileUtils.getJavaExtensionFilter ();
-        List<File> filesA = FileUtils.getAllFiles (dirB, filter);
-        IClassAndIfaceHolder secondHolder = new JavaCollector ().collect (filesA);
+        List<File> filesB = FileUtils.getAllFiles (dirB, filter);
+        IClassAndIfaceHolder secondHolder = new JavaCollector ().collect (filesB);
 
         return compare (preparedHolder, secondHolder);
     }
@@ -133,10 +134,9 @@ public class JavaComparator implements ILanguageComparator {
         // function head will recieve from 150 to 1000 points depending on body size
         // 150 will be awarded to 1 body statement and 1000 point for 15 and more statements
         final int stmts = (int) (statementsResult.getMax () / PENALTY_MAXIMUM);
-        int balance = stmts * 60 + 90;
-        balance = balance < 150 ? 150 : balance > 1000 ? 1000 : balance;
+        int balance = stmts * 20 + 130;
+        balance = balance < 150 ? 150 : balance > 3000 ? 3000 : balance;
         head = head.balance (balance);
-
 
         return head.add (body);
     }
@@ -173,9 +173,13 @@ public class JavaComparator implements ILanguageComparator {
         Difference classResult = Difference.empty ();
         Difference ifaceResult = Difference.empty ();
 
+        
+        // create crate
+        CountCrate<ClassHolder> cc = new CountCrate (a.getClasses (), b.getClasses ());
+        
         // go through all classes
-        for (ClassHolder c0 : a.getClasses ()) {
-            for (ClassHolder c1 : b.getClasses ()) {
+        for (ClassHolder c0 : cc.getLarger ()) {
+            for (ClassHolder c1 : cc.getSmaller ()) {
                 // compare classes
                 classDiff = compareClassOrIface (c0, c1);
 
@@ -189,18 +193,17 @@ public class JavaComparator implements ILanguageComparator {
                 }
             }
             classResult = classResult.add (classBest);
-            if (DEBUG) {
-                System.out.println ("::::::::::::::::::::::");
-                System.out.println (classBest);
-                System.out.println ("::::::::::::::::::::::");
-            }
+            if (DEBUG)
+                System.out.format ("%-10s: %s%n", "CLASS", classBest);
             classBest = null;
         }
 
+        // create crate
+        CountCrate<IfaceHolder> cc2 = new CountCrate (a.getIfaces (), b.getIfaces ());
 
         // go through all ifaces
-        for (IfaceHolder c0 : a.getIfaces ()) {
-            for (IfaceHolder c1 : b.getIfaces ()) {
+        for (IfaceHolder c0 : cc2.getLarger ()) {
+            for (IfaceHolder c1 : cc2.getSmaller ()) {
                 // compare classes
                 ifaceDiff = compareClassOrIface (c0, c1);
 
@@ -214,11 +217,8 @@ public class JavaComparator implements ILanguageComparator {
                 }
             }
             ifaceResult = ifaceResult.add (ifaceBest);
-            if (DEBUG) {
-                System.out.println ("**********************");
-                System.out.println (ifaceBest);
-                System.out.println ("**********************");
-            }
+            if (DEBUG)
+                System.out.format ("%-10s: %s%n", "IFACE", ifaceBest);
             classBest = null;
         }
 
@@ -250,8 +250,12 @@ public class JavaComparator implements ILanguageComparator {
         // fields
         fldsDiff = distance (a.getFields (), b.getFields (), FieldPenalisator.get ());
 
-        for (IStatementVisitor c0 : a.getMethods ()) {
-            for (IStatementVisitor c1 : b.getMethods ()) {
+        // create crate
+        CountCrate<IStatementVisitor> cc = new CountCrate (a.getMethods (), b.getMethods ());
+        
+        // go through all methods
+        for (IStatementVisitor c0 : cc.getLarger ()) {
+            for (IStatementVisitor c1 : cc.getSmaller ()) {
                 // compare classes
                 methodDiff = compareFunction (c0, c1);
 
@@ -266,13 +270,14 @@ public class JavaComparator implements ILanguageComparator {
             }
             result = result.add (best);
             if (DEBUG) {
-                System.out.println ("----------------------");
-                System.out.println (best);
-                System.out.println (bestMatch.getFunction ());
-                System.out.println (bestMatch.getStatements ());
-                System.out.println (c0.getFunction ());
-                System.out.println (c0.getStatements ());
-                System.out.println ("----------------------");
+//                System.out.println ("----------------------");
+                System.out.format ("%-10s: %s%n", "METHOD", best);
+//                System.out.println (best);
+//                System.out.println (bestMatch.getFunction ());
+//                System.out.println (bestMatch.getStatements ());
+//                System.out.println (c0.getFunction ());
+//                System.out.println (c0.getStatements ());
+//                System.out.println ("----------------------");
             }
             best = null;
         }
