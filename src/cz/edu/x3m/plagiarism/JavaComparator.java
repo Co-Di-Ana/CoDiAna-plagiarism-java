@@ -9,6 +9,7 @@ import cz.edu.x3m.data.mains.IfaceHolder;
 import cz.edu.x3m.plagiarism.comparators.FieldPenalisator;
 import cz.edu.x3m.plagiarism.comparators.ParameterPenalisator;
 import cz.edu.x3m.plagiarism.comparators.StatementPenalisator;
+import cz.edu.x3m.plagiarism.exception.CompareException;
 import cz.edu.x3m.plagiarism.utils.CountCrate;
 import cz.edu.x3m.plagiarism.utils.FileUtils;
 import cz.edu.x3m.plagiarism.visitors.IClassAndIfaceHolder;
@@ -42,23 +43,34 @@ public class JavaComparator implements ILanguageComparator {
 
 
     @Override
-    public void prepare (File dirA) throws Exception {
+    public void prepare (File dirA) throws CompareException {
         FilenameFilter filter = FileUtils.getJavaExtensionFilter ();
         List<File> filesA = FileUtils.getAllFiles (dirA, filter);
-        preparedHolder = new JavaCollector ().collect (filesA);
+        try {
+            preparedHolder = new JavaCollector ().collect (filesA);
+        } catch (Exception e) {
+            throw new CompareException (e);
+        }
+
     }
 
 
 
     @Override
-    public Difference compare (File dirB) throws Exception {
+    public Difference compare (File dirB) throws CompareException {
         if (preparedHolder == null)
-            throw new Exception ("solution was not prepared before!");
+            throw new RuntimeException ("solution was not prepared before!");
 
 
         FilenameFilter filter = FileUtils.getJavaExtensionFilter ();
         List<File> filesB = FileUtils.getAllFiles (dirB, filter);
-        IClassAndIfaceHolder secondHolder = new JavaCollector ().collect (filesB);
+        IClassAndIfaceHolder secondHolder;
+        try {
+            secondHolder = new JavaCollector ().collect (filesB);
+        } catch (Exception e) {
+            throw new CompareException (e);
+        }
+
 
         return compare (preparedHolder, secondHolder);
     }
@@ -66,13 +78,19 @@ public class JavaComparator implements ILanguageComparator {
 
 
     @Override
-    public Difference compare (File dirA, File dirB) throws Exception {
+    public Difference compare (File dirA, File dirB) throws CompareException {
         FilenameFilter filter = FileUtils.getJavaExtensionFilter ();
         List<File> filesA = FileUtils.getAllFiles (dirA, filter);
         List<File> filesB = FileUtils.getAllFiles (dirB, filter);
+        IClassAndIfaceHolder holderA, holderB;
 
-        IClassAndIfaceHolder holderA = new JavaCollector ().collect (filesA);
-        IClassAndIfaceHolder holderB = new JavaCollector ().collect (filesB);
+        try {
+            holderA = new JavaCollector ().collect (filesA);
+            holderB = new JavaCollector ().collect (filesB);
+        } catch (Exception e) {
+            throw new CompareException (e);
+        }
+
 
         return compare (holderA, holderB);
     }
@@ -173,10 +191,10 @@ public class JavaComparator implements ILanguageComparator {
         Difference classResult = Difference.empty ();
         Difference ifaceResult = Difference.empty ();
 
-        
+
         // create crate
         CountCrate<ClassHolder> cc = new CountCrate (a.getClasses (), b.getClasses ());
-        
+
         // go through all classes
         for (ClassHolder c0 : cc.getLarger ()) {
             for (ClassHolder c1 : cc.getSmaller ()) {
@@ -252,7 +270,7 @@ public class JavaComparator implements ILanguageComparator {
 
         // create crate
         CountCrate<IStatementVisitor> cc = new CountCrate (a.getMethods (), b.getMethods ());
-        
+
         // go through all methods
         for (IStatementVisitor c0 : cc.getLarger ()) {
             for (IStatementVisitor c1 : cc.getSmaller ()) {
